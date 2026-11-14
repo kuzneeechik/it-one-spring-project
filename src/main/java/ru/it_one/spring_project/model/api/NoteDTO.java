@@ -1,4 +1,4 @@
-package ru.it_one.spring_project.model;
+package ru.it_one.spring_project.model.api;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -10,7 +10,7 @@ import java.util.UUID;
 @Accessors(chain = true)
 public class NoteDTO {
 
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     private String header;
 
