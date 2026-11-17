@@ -3,13 +3,14 @@ package ru.it_one.spring_project.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.it_one.spring_project.model.api.NoteCreateModel;
 import ru.it_one.spring_project.model.api.NoteDTO;
 import ru.it_one.spring_project.model.domain.NoteEntity;
 import ru.it_one.spring_project.repository.NoteRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,52 +19,53 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
 
-    public List<NoteDTO> getNotes() {
+    public Flux<NoteDTO> getNotes() {
         var notes = noteRepository.findAll();
 
-        return notes.stream()
+        return notes
                 .map(note -> new NoteDTO()
                         .setId(note.getId())
                         .setHeader(note.getHeader())
                         .setText(note.getText())
                         .setCreatedAt(note.getCreatedAt())
-                        .setUpdatedAt(note.getUpdatedAt()))
-                .toList();
+                        .setUpdatedAt(note.getUpdatedAt())
+                );
     }
 
-    public NoteDTO createNote(@RequestBody NoteCreateModel note) {
+    public Mono<NoteDTO> createNote(@RequestBody NoteCreateModel note) {
         var newNote = new NoteEntity()
                 .setHeader(note.getHeader())
                 .setText(note.getText())
                 .setCreatedAt(LocalDateTime.now())
                 .setUpdatedAt(LocalDateTime.now());
 
-        noteRepository.save(newNote);
-
-        return new NoteDTO()
-                .setId(newNote.getId())
-                .setHeader(newNote.getHeader())
-                .setText(newNote.getText())
-                .setCreatedAt(newNote.getCreatedAt())
-                .setUpdatedAt(newNote.getUpdatedAt());
+        return noteRepository.save(newNote)
+                .map(savedNote -> new NoteDTO()
+                        .setId(savedNote.getId())
+                        .setHeader(savedNote.getHeader())
+                        .setText(savedNote.getText())
+                        .setCreatedAt(savedNote.getCreatedAt())
+                        .setUpdatedAt(savedNote.getUpdatedAt()));
     }
 
-    public NoteDTO updateNote(UUID id, NoteCreateModel noteData) {
-        var note = noteRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Note not found"));
+    public Mono<NoteDTO> updateNote(UUID id, NoteCreateModel noteData) {
+        return noteRepository.findById(id)
+                .switchIfEmpty(
+                        Mono.error(new IllegalArgumentException("Note not found!"))
+                )
+                .flatMap(note -> {
+                    note
+                        .setHeader(noteData.getHeader())
+                        .setText(noteData.getText())
+                        .setUpdatedAt(LocalDateTime.now());
 
-        note
-            .setHeader(noteData.getHeader())
-            .setText(noteData.getText())
-                .setUpdatedAt(LocalDateTime.now());
-
-        noteRepository.save(note);
-
-        return new NoteDTO()
-                .setId(note.getId())
-                .setHeader(note.getHeader())
-                .setText(note.getText())
-                .setUpdatedAt(LocalDateTime.now())
-                .setCreatedAt(LocalDateTime.now());
+                    return noteRepository.save(note);
+                })
+                .map(savedNote -> new NoteDTO()
+                        .setId(savedNote.getId())
+                        .setHeader(savedNote.getHeader())
+                        .setText(savedNote.getText())
+                        .setCreatedAt(savedNote.getCreatedAt())
+                        .setUpdatedAt(savedNote.getUpdatedAt()));
     }
 }

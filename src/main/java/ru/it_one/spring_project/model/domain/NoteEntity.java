@@ -1,9 +1,8 @@
 package ru.it_one.spring_project.model.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -11,7 +10,6 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
 @Getter
 @Setter
 @Table(name = "note")
@@ -19,17 +17,15 @@ import java.util.UUID;
 public class NoteEntity {
 
     @Id
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
-    @Column(nullable = false)
     private String header;
 
-    @Column(nullable = false)
     private String text;
 
-    @Column(name = "created_at", nullable = false)
+    @Column("created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column("updated_at")
     private LocalDateTime updatedAt;
 }
