@@ -6,12 +6,7 @@ spring:
   application:
     name: spring-project
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/Notes}
+  r2dbc:
+    url: ${SPRING_DATASOURCE_URL:r2dbc:postgresql://localhost:5432/Notes}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:363639}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update

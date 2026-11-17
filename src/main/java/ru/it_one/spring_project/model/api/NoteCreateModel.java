@@ -1,9 +1,9 @@
-package ru.it_one.spring_project.model;
+package ru.it_one.spring_project.model.api;
 
 import lombok.Data;
 
 @Data
-public class NoteModel {
+public class NoteCreateModel {
 
     private String header;
 
